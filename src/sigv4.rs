@@ -27,7 +27,7 @@ use sha2::{Digest, Sha256};
 use transport::error::{Result, protocol_error};
 
 use http::message::Request;
-use http::percent::encode;
+use net::percent::encode;
 
 const ALGORITHM: &str = "AWS4-HMAC-SHA256";
 
