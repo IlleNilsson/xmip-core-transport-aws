@@ -18,8 +18,10 @@ path = "src/lib.rs"
 # (repository-model.md): the error vocabulary and the XML reader.
 transport = { package = "xmip-core-transport", git = "https://github.com/IlleNilsson/xmip-core-transport", branch = "main" }
 # What AWS speaks rides on HTTP: the request and its answer, the judgement
-# of an answer and percent-encoding.
+# of an answer.
 http = { package = "xmip-core-transport-http", git = "https://github.com/IlleNilsson/xmip-core-transport-http", branch = "main" }
+# Percent-encoding (RFC 3986), written once for the estate.
+net = { package = "xmip-core-library-net", git = "https://github.com/IlleNilsson/xmip-core-library-net", branch = "main" }
 # XML character data escaped, a digest written as hex, and the civil
 # calendar x-amz-date is written off.
 codec = { package = "xmip-core-library-codec", git = "https://github.com/IlleNilsson/xmip-core-library-codec", branch = "main" }

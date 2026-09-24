@@ -17,7 +17,7 @@ use transport::error::{Result, TransportError};
 use transport::xml::first;
 
 use http::message::{self, Request, Response};
-use http::percent::{decode, encode};
+use net::percent::{decode, encode};
 
 /// The form-encoded content type every Query request carries.
 pub const CONTENT_TYPE: &str = "application/x-www-form-urlencoded; charset=utf-8";
