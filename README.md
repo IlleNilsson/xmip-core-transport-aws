@@ -1,42 +1,33 @@
-# Xmip repository template — Rust
+# xmip-core-transport-aws
 
-This repository is the starter snapshot for a Rust Xmip module repository. It is
-not an Xmip runtime capability.
+What every AWS technology speaks over HTTP: Signature Version 4, the Query API
+and the JSON 1.1 protocol, both sides of each. Not a transport of its own:
+[s3](https://github.com/IlleNilsson/xmip-core-transport-s3),
+[aws-sqs](https://github.com/IlleNilsson/xmip-core-transport-aws-sqs),
+[aws-sns](https://github.com/IlleNilsson/xmip-core-transport-aws-sns) and
+[aws-kinesis](https://github.com/IlleNilsson/xmip-core-transport-aws-kinesis)
+ride on it, and it rides on
+[xmip-core-transport-http](https://github.com/IlleNilsson/xmip-core-transport-http).
+A technology of
+[xmip-core-transport](https://github.com/IlleNilsson/xmip-core-transport).
 
-For a .NET 11 surface — the CLI, the PowerShell module, the MAUI desktop GUI or
-the Blazor web GUI — use
-[xmip-template-dotnet](https://github.com/IlleNilsson/xmip-template-dotnet)
-instead. ADR-0014: every user-interfacing module is .NET 11, and
-`xmip-core-abi` is the exception.
+| module | what |
+| --- | --- |
+| `sigv4` | Signature Version 4: a Location signs, a technology's session verifies |
+| `query` | the Query API, for aws-sqs and aws-sns |
+| `json` | the JSON 1.1 protocol, for aws-kinesis; a `Service` names each one |
 
-A repository generated from this template has independent history. Later
-template changes do not automatically rewrite generated repositories.
-
-## Before implementation
-
-Follow [TEMPLATE_SETUP.md](TEMPLATE_SETUP.md), and item 3 first. The new
-repository must be classified and declared in the authoritative Xmip
-architecture manifest before its responsibility or dependencies are treated as
-accepted architecture.
+Created 2026-09-24 on the owner's ruling of 2026-09-22: what one vendor speaks
+leaves the http technology for a crate of that vendor's. The signer and the
+Query API lived in http from 2026-09-14, and JSON 1.1 in aws-kinesis
+(ADR-0044, amendment 2026-09-24).
 
 ## Toolchain
 
-`rust-toolchain.toml` pins the toolchain for the whole estate. rustup reads it
-automatically and installs what is missing. Do not change it here — raising it
-is one deliberate change across every repository.
-
-## Shared governance
-
-Repository-specific licensing remains explicit in [LICENSE](LICENSE).
-Contribution, security, support, issue and pull-request defaults are inherited
-from [IlleNilsson/.github](https://github.com/IlleNilsson/.github) when they are
-not overridden locally.
+`rust-toolchain.toml` pins the toolchain for the whole estate. Do not change it
+here.
 
 ## Verification
 
 The included workflow is manual-only and calls the versioned shared workflow at
-`IlleNilsson/.github@v1`. It does not run on pushes, pull requests or a
-schedule.
-
-The ordered stages are formatting, semantic analysis, linting, compilation and
-linking, and test execution. Packaging and publishing are not configured.
+`IlleNilsson/.github@v1`.
