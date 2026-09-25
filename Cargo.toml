@@ -20,7 +20,8 @@ transport = { package = "xmip-core-transport", git = "https://github.com/IlleNil
 # What AWS speaks rides on HTTP: the request and its answer, the judgement
 # of an answer.
 http = { package = "xmip-core-transport-http", git = "https://github.com/IlleNilsson/xmip-core-transport-http", branch = "main" }
-# Percent-encoding (RFC 3986), written once for the estate.
+# Percent-encoding (RFC 3986), written once for the estate, and the
+# request and answer the signer and the protocols form (`net::http`).
 net = { package = "xmip-core-library-net", git = "https://github.com/IlleNilsson/xmip-core-library-net", branch = "main" }
 # XML character data escaped, a digest written as hex, and the civil
 # calendar x-amz-date is written off.
