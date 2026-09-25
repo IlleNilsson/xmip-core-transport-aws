@@ -14,7 +14,8 @@
 use serde_json::{Value, json};
 use transport::error::{Result, protocol_error};
 
-use http::message::{self, Request, Response};
+use http::status;
+use net::http::{Request, Response};
 
 /// The content type every JSON 1.1 request and answer carries.
 pub const CONTENT_TYPE: &str = "application/x-amz-json-1.1";
@@ -59,7 +60,7 @@ impl Service {
     /// # Errors
     /// Where the status is not 2xx, or the answer is not JSON.
     pub fn judge(&self, response: Response) -> Result<Value> {
-        let answer = message::judge(self.name, response, kind, |kind| {
+        let answer = status::judge(self.name, response, kind, |kind| {
             self.repeatable.contains(&kind)
         })?;
         if answer.body.is_empty() {

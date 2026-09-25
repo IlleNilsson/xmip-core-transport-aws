@@ -16,7 +16,8 @@ use codec::xml::escape;
 use transport::error::{Result, TransportError};
 use transport::xml::first;
 
-use http::message::{self, Request, Response};
+use http::status;
+use net::http::{Request, Response};
 use net::percent::{decode, encode};
 
 /// The form-encoded content type every Query request carries.
@@ -63,7 +64,7 @@ pub fn parameter<'a>(parameters: &'a [(String, String)], name: &str) -> Option<&
 /// # Errors
 /// Where the status is not 2xx.
 pub fn judge(service: &str, response: Response) -> Result<Response> {
-    message::judge(
+    status::judge(
         service,
         response,
         |answer| {
