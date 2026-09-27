@@ -10,7 +10,9 @@
 //! One signer for every service: the scope names the service, and that is
 //! the only place S3, SQS, SNS and Kinesis differ — except that S3 alone
 //! asks for the payload hash in `x-amz-content-sha256`, and AWS's own
-//! worked example for the Query API signs without it. s3 and aws-sqs each
+//! worked example for the Query API signs without it. The signer does not
+//! tell S3 by its name: the s3 technology builds its signer
+//! [`Signer::hashing_payload_in_header`]. s3 and aws-sqs each
 //! carried this file until 2026-09-14, one with the service baked in and
 //! one with it as a field; it lived in the http technology from then until
 //! the owner's ruling of 2026-09-22 moved it here (ADR-0044).
@@ -31,7 +33,7 @@ use net::percent::encode;
 
 const ALGORITHM: &str = "AWS4-HMAC-SHA256";
 
-/// The header S3 alone asks the payload hash to travel in.
+/// The header a service that asks for it — S3 — takes the payload hash in.
 const PAYLOAD_HEADER: &str = "x-amz-content-sha256";
 
 /// The service, region and credential a signature is made under.
@@ -41,6 +43,7 @@ pub struct Signer {
     region: String,
     access_key: String,
     secret_key: String,
+    payload_header: bool,
 }
 
 impl Signer {
@@ -53,18 +56,27 @@ impl Signer {
             region: region.to_string(),
             access_key: access_key.to_string(),
             secret_key: secret_key.to_string(),
+            payload_header: false,
         }
     }
 
+    /// Carry the payload hash in `x-amz-content-sha256` and demand it on
+    /// what is verified, as S3 asks.
+    #[must_use]
+    pub const fn hashing_payload_in_header(mut self) -> Self {
+        self.payload_header = true;
+        self
+    }
+
     /// Sign `request` as of `at`, an `x-amz-date` such as [`now`] gives,
-    /// adding `x-amz-date`, `Authorization` and — for S3 —
-    /// `x-amz-content-sha256`. Every header already on the request is
+    /// adding `x-amz-date`, `Authorization` and — where the signer hashes
+    /// the payload in a header — `x-amz-content-sha256`. Every header already on the request is
     /// signed, so `Host` goes on first.
     #[must_use]
     pub fn sign(&self, request: Request, at: &str) -> Request {
         let payload = hex::encode(&Sha256::digest(&request.body));
         let mut request = request.header("x-amz-date", at);
-        if self.hashes_in_a_header() {
+        if self.payload_header {
             request = request.header(PAYLOAD_HEADER, &payload);
         }
         let signed = signed_headers(&request.headers);
@@ -101,7 +113,7 @@ impl Signer {
             Some(carried) if carried != payload => {
                 return Err(protocol_error("a payload hash the body does not match"));
             }
-            None if self.hashes_in_a_header() => {
+            None if self.payload_header => {
                 return Err(protocol_error("a request with no x-amz-content-sha256"));
             }
             _ => {}
@@ -111,11 +123,6 @@ impl Signer {
         self.mac(at, &scope, &canonical(request, signed, &payload))
             .verify_slice(&given)
             .map_err(|_| differs())
-    }
-
-    /// S3 alone asks for the payload hash in a header of its own.
-    fn hashes_in_a_header(&self) -> bool {
-        self.service == "s3"
     }
 
     fn scope(&self, at: &str) -> String {
@@ -267,7 +274,8 @@ mod tests {
             "us-east-1",
             "AKIAIOSFODNN7EXAMPLE",
             "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-        );
+        )
+        .hashing_payload_in_header();
         let request = Request::new("GET", "/test.txt")
             .header("Host", "examplebucket.s3.amazonaws.com")
             .header("Range", "bytes=0-9");
@@ -344,15 +352,21 @@ mod tests {
         assert!(signer.verify(&Request::new("GET", "/")).is_err());
         let bare = Request::new("GET", "/").header("Authorization", "Basic x");
         assert!(signer.verify(&bare).is_err());
-        let carried = Signer::new("s3", "eu-north-1", "AKID", "secret")
+        let s3 = Signer::new("s3", "eu-north-1", "AKID", "secret").hashing_payload_in_header();
+        let carried = s3
+            .clone()
             .sign(Request::new("PUT", "/b/k").body(b"UNA"), &now());
         let mut tampered = carried.clone();
         tampered.body = b"UNB".to_vec();
         assert!(
-            Signer::new("s3", "eu-north-1", "AKID", "secret")
-                .verify(&tampered)
-                .is_err(),
+            s3.verify(&tampered).is_err(),
             "the carried hash is checked against the body"
+        );
+        let named = Signer::new("s3", "eu-north-1", "AKID", "secret")
+            .sign(Request::new("PUT", "/b/k").body(b"UNA"), &now());
+        assert!(
+            named.header_value(PAYLOAD_HEADER).is_none(),
+            "the flag decides, never the service's name"
         );
     }
 }
