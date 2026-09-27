@@ -68,9 +68,10 @@ pub fn judge(service: &str, response: Response) -> Result<Response> {
         service,
         response,
         |answer| {
-            first(&answer.text(), "Code")
+            answer
+                .text()
                 .ok()
-                .flatten()
+                .and_then(|xml| first(xml, "Code").ok().flatten())
                 .unwrap_or_default()
         },
         |code| {
