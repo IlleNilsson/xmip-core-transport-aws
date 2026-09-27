@@ -13,7 +13,7 @@ A technology of
 
 | module | what |
 | --- | --- |
-| `sigv4` | Signature Version 4: a Location signs, a technology's session verifies |
+| `sigv4` | Signature Version 4: a Location signs, a technology's session verifies; a signer built `hashing_payload_in_header` carries and demands `x-amz-content-sha256`, as s3 builds its own — never decided by the service's name |
 | `query` | the Query API, for aws-sqs and aws-sns |
 | `json` | the JSON 1.1 protocol, for aws-kinesis; a `Service` names each one |
 
