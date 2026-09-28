@@ -22,6 +22,8 @@ leaves the http technology for a crate of that vendor's. The signer and the
 Query API lived in http from 2026-09-14, and JSON 1.1 in aws-kinesis
 (ADR-0044, amendment 2026-09-24).
 
+The Query API's form body is written and read by `net::percent::encode_pairs` and `decode_pairs`, one reading with HTTP's query; until 2026-09-28 this crate wrote and decoded the form again.
+
 ## Toolchain
 
 `rust-toolchain.toml` pins the toolchain for the whole estate. Do not change it

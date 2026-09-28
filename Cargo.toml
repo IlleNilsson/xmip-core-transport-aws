@@ -29,8 +29,8 @@ codec = { package = "xmip-core-library-codec", git = "https://github.com/IlleNil
 
 # Signature Version 4 is SHA-256 and HMAC-SHA256; the HMAC's own check is
 # the constant-time comparison. Pure Rust and small.
-sha2 = "0.10"
-hmac = "0.12"
+sha2 = "0.11"
+hmac = "0.13"
 # The JSON 1.1 protocol's documents.
 serde_json = "1"
 

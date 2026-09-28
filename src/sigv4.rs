@@ -24,7 +24,7 @@ use std::time::SystemTime;
 
 use codec::civil::CivilTime;
 use codec::hex;
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, KeyInit, Mac};
 use sha2::{Digest, Sha256};
 use transport::error::{Result, protocol_error};
 
@@ -196,7 +196,7 @@ pub fn now() -> String {
 /// `20130524T000000Z`. The http technology wrote it beside RFC 1123 until
 /// 2026-09-24, off a clock the two shared; the clock is codec's now.
 #[must_use]
-pub fn amz_date(at: SystemTime) -> String {
+fn amz_date(at: SystemTime) -> String {
     let moment = CivilTime::from_system_time(at);
     format!(
         "{:04}{:02}{:02}T{:02}{:02}{:02}Z",
