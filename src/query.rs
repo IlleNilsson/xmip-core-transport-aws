@@ -14,11 +14,10 @@
 
 use codec::xml::escape;
 use transport::error::{Result, TransportError};
-use transport::xml::first;
 
 use http::status;
 use net::http::{Request, Response};
-use net::percent::{decode, encode};
+use net::percent::{decode_pairs, encode_pairs};
 
 /// The form-encoded content type every Query request carries.
 pub const CONTENT_TYPE: &str = "application/x-www-form-urlencoded; charset=utf-8";
@@ -27,26 +26,15 @@ pub const CONTENT_TYPE: &str = "application/x-www-form-urlencoded; charset=utf-8
 /// `path`, percent-encoded as AWS wants it — `%20`, never `+`.
 #[must_use]
 pub fn request(path: &str, parameters: &[(&str, &str)]) -> Request {
-    let pairs: Vec<String> = parameters
-        .iter()
-        .map(|(name, value)| format!("{}={}", encode(name, false), encode(value, false)))
-        .collect();
     Request::new("POST", path)
         .header("Content-Type", CONTENT_TYPE)
-        .body(pairs.join("&").as_bytes())
+        .body(encode_pairs(parameters).as_bytes())
 }
 
 /// The far end's side: the parameters a request's body carries, decoded.
 #[must_use]
 pub fn parameters(request: &Request) -> Vec<(String, String)> {
-    String::from_utf8_lossy(&request.body)
-        .split('&')
-        .filter(|pair| !pair.is_empty())
-        .map(|pair| {
-            let (name, value) = pair.split_once('=').unwrap_or((pair, ""));
-            (decode(name), decode(value))
-        })
-        .collect()
+    decode_pairs(&String::from_utf8_lossy(&request.body))
 }
 
 /// One parameter's value.
@@ -71,7 +59,7 @@ pub fn judge(service: &str, response: Response) -> Result<Response> {
             answer
                 .text()
                 .ok()
-                .and_then(|xml| first(xml, "Code").ok().flatten())
+                .and_then(|xml| codec::xml::text(xml, "Code").ok().flatten())
                 .unwrap_or_default()
         },
         |code| {
