@@ -28,8 +28,8 @@ use hmac::{Hmac, KeyInit, Mac};
 use sha2::{Digest, Sha256};
 use transport::error::{Result, protocol_error};
 
+use codec::percent::encode;
 use net::http::Request;
-use net::percent::encode;
 
 const ALGORITHM: &str = "AWS4-HMAC-SHA256";
 
