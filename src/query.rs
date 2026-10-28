@@ -15,9 +15,9 @@
 use codec::xml::escape;
 use transport::error::{Result, TransportError};
 
+use codec::percent::{decode_pairs, encode_pairs};
 use http::status;
 use net::http::{Request, Response};
-use net::percent::{decode_pairs, encode_pairs};
 
 /// The form-encoded content type every Query request carries.
 pub const CONTENT_TYPE: &str = "application/x-www-form-urlencoded; charset=utf-8";
