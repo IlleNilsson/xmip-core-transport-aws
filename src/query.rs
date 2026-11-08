@@ -15,7 +15,7 @@
 use codec::xml::escape;
 use transport::error::{Result, TransportError};
 
-use codec::percent::{decode_pairs, encode_pairs};
+use codec::percent::{decode_form_pairs, encode_pairs};
 use http::status;
 use net::http::{Request, Response};
 
@@ -31,10 +31,11 @@ pub fn request(path: &str, parameters: &[(&str, &str)]) -> Request {
         .body(encode_pairs(parameters).as_bytes())
 }
 
-/// The far end's side: the parameters a request's body carries, decoded.
+/// The far end's side: the parameters a request's body carries, decoded as
+/// the form it is, a `+` a space.
 #[must_use]
 pub fn parameters(request: &Request) -> Vec<(String, String)> {
-    decode_pairs(&String::from_utf8_lossy(&request.body))
+    decode_form_pairs(&String::from_utf8_lossy(&request.body))
 }
 
 /// One parameter's value.
@@ -145,6 +146,12 @@ mod tests {
         assert_eq!(parameter(&read, "Action"), Some("SendMessage"));
         assert_eq!(parameter(&read, "MessageBody"), Some("UNA:+.? 'a&b"));
         assert_eq!(parameter(&read, "Absent"), None);
+        // What an SDK posts: a space as `+`, a plus escaped.
+        let posted = Request::new("POST", "/").body(b"MessageBody=a+b%2Bc");
+        assert_eq!(
+            parameter(&parameters(&posted), "MessageBody"),
+            Some("a b+c")
+        );
     }
 
     #[test]
