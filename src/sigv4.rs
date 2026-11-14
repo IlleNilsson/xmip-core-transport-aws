@@ -23,9 +23,8 @@
 use std::time::SystemTime;
 
 use codec::civil::CivilTime;
+use codec::digest::{HmacSha256, hmac_sha256, sha256};
 use codec::hex;
-use hmac::{Hmac, KeyInit, Mac};
-use sha2::{Digest, Sha256};
 use transport::error::{Result, protocol_error};
 
 use codec::percent::encode;
@@ -74,7 +73,7 @@ impl Signer {
     /// signed, so `Host` goes on first.
     #[must_use]
     pub fn sign(&self, request: Request, at: &str) -> Request {
-        let payload = hex::encode(&Sha256::digest(&request.body));
+        let payload = hex::encode(&sha256(&request.body));
         let mut request = request.header("x-amz-date", at);
         if self.payload_header {
             request = request.header(PAYLOAD_HEADER, &payload);
@@ -108,7 +107,7 @@ impl Signer {
         if credential != format!("{}/{scope}", self.access_key) {
             return Err(protocol_error("a credential this signer does not hold"));
         }
-        let payload = hex::encode(&Sha256::digest(&request.body));
+        let payload = hex::encode(&sha256(&request.body));
         match request.header_value(PAYLOAD_HEADER) {
             Some(carried) if carried != payload => {
                 return Err(protocol_error("a payload hash the body does not match"));
@@ -120,9 +119,13 @@ impl Signer {
         }
         let differs = || protocol_error("a signature that does not match");
         let given = hex::decode(signature).map_err(|_| differs())?;
-        self.mac(at, &scope, &canonical(request, signed, &payload))
-            .verify_slice(&given)
-            .map_err(|_| differs())
+        if self
+            .mac(at, &scope, &canonical(request, signed, &payload))
+            .verify(&given)
+        {
+            return Ok(());
+        }
+        Err(differs())
     }
 
     fn scope(&self, at: &str) -> String {
@@ -135,23 +138,23 @@ impl Signer {
     }
 
     fn signature(&self, at: &str, scope: &str, canonical: &str) -> String {
-        hex::encode(&self.mac(at, scope, canonical).finalize().into_bytes())
+        hex::encode(&self.mac(at, scope, canonical).finish())
     }
 
-    /// The HMAC under the signing key, over the string to sign: finalized
+    /// The HMAC under the signing key, over the string to sign: finished
     /// it is the signature, and its check compares one in constant time.
-    fn mac(&self, at: &str, scope: &str, canonical: &str) -> Hmac<Sha256> {
+    fn mac(&self, at: &str, scope: &str, canonical: &str) -> HmacSha256 {
         let to_sign = format!(
             "{ALGORITHM}\n{at}\n{scope}\n{}",
-            hex::encode(&Sha256::digest(canonical.as_bytes()))
+            hex::encode(&sha256(canonical.as_bytes()))
         );
         let key = [date_of(at), &self.region, &self.service, "aws4_request"]
             .iter()
             .fold(
                 format!("AWS4{}", self.secret_key).into_bytes(),
-                |key, step| hmac(&key, step.as_bytes()),
+                |key, step| hmac_sha256(&key, step.as_bytes()).to_vec(),
             );
-        let mut mac = Hmac::<Sha256>::new_from_slice(&key).expect("HMAC takes a key of any length");
+        let mut mac = HmacSha256::new(&key);
         mac.update(to_sign.as_bytes());
         mac
     }
@@ -239,12 +242,6 @@ fn parts(authorization: &str) -> Result<(&str, &str, &str)> {
             "an Authorization missing one of its three parts",
         )),
     }
-}
-
-fn hmac(key: &[u8], data: &[u8]) -> Vec<u8> {
-    let mut mac = Hmac::<Sha256>::new_from_slice(key).expect("HMAC takes a key of any length");
-    mac.update(data);
-    mac.finalize().into_bytes().to_vec()
 }
 
 #[cfg(test)]
