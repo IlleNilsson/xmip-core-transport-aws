@@ -20,12 +20,11 @@
 //! A signature is compared by the HMAC's own check, which takes the same
 //! time however far the two agree.
 
-use std::time::SystemTime;
-
 use codec::civil::CivilTime;
 use codec::digest::{HmacSha256, hmac_sha256, sha256};
 use codec::hex;
 use transport::error::{Result, protocol_error};
+use xcore::{Clock, SystemClock};
 
 use codec::percent::encode;
 use net::http::Request;
@@ -192,15 +191,15 @@ pub fn canonical(request: &Request, signed: &str, payload_hash: &str) -> String 
 /// The moment now, as `x-amz-date` writes it: `20260908T120000Z`.
 #[must_use]
 pub fn now() -> String {
-    amz_date(SystemTime::now())
+    amz_date(SystemClock.unix_seconds())
 }
 
-/// `at` as `x-amz-date` writes it, the basic ISO 8601 a scope opens with:
-/// `20130524T000000Z`. The http technology wrote it beside RFC 1123 until
-/// 2026-09-24, off a clock the two shared; the clock is codec's now.
+/// The moment `seconds` after the epoch as `x-amz-date` writes it, the
+/// basic ISO 8601 a scope opens with: `20130524T000000Z`. Its calendar is
+/// codec's (`codec::civil`), its clock xmip-core's (`xcore::Clock`).
 #[must_use]
-fn amz_date(at: SystemTime) -> String {
-    let moment = CivilTime::from_system_time(at);
+fn amz_date(seconds: i64) -> String {
+    let moment = CivilTime::from_unix(seconds);
     format!(
         "{:04}{:02}{:02}T{:02}{:02}{:02}Z",
         moment.year, moment.month, moment.day, moment.hour, moment.minute, moment.second
@@ -247,18 +246,12 @@ fn parts(authorization: &str) -> Result<(&str, &str, &str)> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::{Duration, UNIX_EPOCH};
 
     #[test]
-    // The number is an epoch second count, and only reads as a moment in
-    // seconds; from_hours would hide which moment it is.
-    #[allow(clippy::duration_suboptimal_units)]
     fn the_date_is_written_as_amazon_writes_it() {
-        let at = UNIX_EPOCH + Duration::from_secs(1_369_353_600);
-        assert_eq!(amz_date(at), "20130524T000000Z");
-        assert_eq!(amz_date(UNIX_EPOCH), "19700101T000000Z");
-        let at = UNIX_EPOCH + Duration::from_secs(951_782_400 + 3_661);
-        assert_eq!(amz_date(at), "20000229T010101Z");
+        assert_eq!(amz_date(1_369_353_600), "20130524T000000Z");
+        assert_eq!(amz_date(0), "19700101T000000Z");
+        assert_eq!(amz_date(951_782_400 + 3_661), "20000229T010101Z");
         assert!(now().ends_with('Z'));
     }
 
