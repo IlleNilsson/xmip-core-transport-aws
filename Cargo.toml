@@ -23,14 +23,11 @@ http = { package = "xmip-core-transport-http", git = "https://github.com/IlleNil
 # Percent-encoding (RFC 3986), written once for the estate, and the
 # request and answer the signer and the protocols form (`net::http`).
 net = { package = "xmip-core-library-net", git = "https://github.com/IlleNilsson/xmip-core-library-net", branch = "main" }
-# XML character data escaped, a digest written as hex, and the civil
-# calendar x-amz-date is written off.
+# XML character data escaped, Signature Version 4's SHA-256 and
+# HMAC-SHA256, its check in constant time (codec::digest), the digest
+# written as hex, and the civil calendar x-amz-date is written off.
 codec = { package = "xmip-core-library-codec", git = "https://github.com/IlleNilsson/xmip-core-library-codec", branch = "main" }
 
-# Signature Version 4 is SHA-256 and HMAC-SHA256; the HMAC's own check is
-# the constant-time comparison. Pure Rust and small.
-sha2 = "0.11"
-hmac = "0.13"
 # The JSON 1.1 protocol's documents.
 serde_json = "1"
 
