@@ -2,7 +2,7 @@
 
 What every AWS technology speaks over HTTP: Signature Version 4, the Query API
 and the JSON 1.1 protocol, both sides of each. Not a transport of its own:
-[s3](https://github.com/IlleNilsson/xmip-core-transport-s3),
+[aws-s3](https://github.com/IlleNilsson/xmip-core-transport-aws-s3),
 [aws-sqs](https://github.com/IlleNilsson/xmip-core-transport-aws-sqs),
 [aws-sns](https://github.com/IlleNilsson/xmip-core-transport-aws-sns) and
 [aws-kinesis](https://github.com/IlleNilsson/xmip-core-transport-aws-kinesis)
@@ -13,7 +13,7 @@ A technology of
 
 | module | what |
 | --- | --- |
-| `sigv4` | Signature Version 4: a Location signs, a technology's session verifies; a signer built `hashing_payload_in_header` carries and demands `x-amz-content-sha256`, as s3 builds its own — never decided by the service's name |
+| `sigv4` | Signature Version 4: a Location signs, a technology's session verifies; a signer built `hashing_payload_in_header` carries and demands `x-amz-content-sha256`, as aws-s3 builds its own — never decided by the service's name |
 | `query` | the Query API, for aws-sqs and aws-sns |
 | `json` | the JSON 1.1 protocol, for aws-kinesis; a `Service` names each one |
 
