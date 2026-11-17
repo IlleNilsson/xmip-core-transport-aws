@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 
 //! What every AWS technology speaks over HTTP. Not a transport of its own:
-//! s3, aws-sqs, aws-sns and aws-kinesis ride on it, and on the http
+//! aws-s3, aws-sqs, aws-sns and aws-kinesis ride on it, and on the http
 //! technology beneath it.
 //!
 //! ```text
@@ -12,7 +12,7 @@
 //! ```
 //!
 //! The signer and the Query API lived in the http technology from
-//! 2026-09-14, when aws-sqs was found importing s3 and aws-sns importing
+//! 2026-09-14, when aws-sqs was found importing aws-s3 and aws-sns importing
 //! aws-sqs, and JSON 1.1 in aws-kinesis. The owner ruled on 2026-09-22 that
 //! what one vendor speaks leaves HTTP for a crate of that vendor's: http
 //! keeps HTTP, and a technology riding on AWS depends on this crate, never

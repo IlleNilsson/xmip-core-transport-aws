@@ -11,8 +11,8 @@
 //! the only place S3, SQS, SNS and Kinesis differ — except that S3 alone
 //! asks for the payload hash in `x-amz-content-sha256`, and AWS's own
 //! worked example for the Query API signs without it. The signer does not
-//! tell S3 by its name: the s3 technology builds its signer
-//! [`Signer::hashing_payload_in_header`]. s3 and aws-sqs each
+//! tell S3 by its name: the aws-s3 technology builds its signer
+//! [`Signer::hashing_payload_in_header`]. aws-s3 and aws-sqs each
 //! carried this file until 2026-09-14, one with the service baked in and
 //! one with it as a field; it lived in the http technology from then until
 //! the owner's ruling of 2026-09-22 moved it here (ADR-0044).
