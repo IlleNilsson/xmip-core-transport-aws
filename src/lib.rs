@@ -5,10 +5,11 @@
 //! technology beneath it.
 //!
 //! ```text
-//! sigv4.rs  Signature Version 4, both sides: a Location signs, a
-//!           technology's session verifies
-//! query.rs  the Query API, for aws-sqs and aws-sns
-//! json.rs   the JSON 1.1 protocol, for aws-kinesis
+//! sigv4.rs       Signature Version 4, both sides: a Location signs, a
+//!                technology's session verifies
+//! access_key.rs  the access key ID a Location signs as, and its secret
+//! query.rs       the Query API, for aws-sqs and aws-sns
+//! json.rs        the JSON 1.1 protocol, for aws-kinesis
 //! ```
 //!
 //! The signer and the Query API lived in the http technology from
@@ -18,6 +19,7 @@
 //! keeps HTTP, and a technology riding on AWS depends on this crate, never
 //! on a sibling (ADR-0044).
 
+pub mod access_key;
 pub mod json;
 pub mod query;
 pub mod sigv4;
