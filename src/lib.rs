@@ -18,8 +18,17 @@
 //! what one vendor speaks leaves HTTP for a crate of that vendor's: http
 //! keeps HTTP, and a technology riding on AWS depends on this crate, never
 //! on a sibling (ADR-0044).
+//!
+//! Built with its `declaration` feature alone, the crate is the setting
+//! every AWS technology declares, `access_key::ACCESS_KEY_ID`, and none of
+//! the code, which is behind the default feature (ADR-0064, amendment
+//! 2026-11-26).
 
+#[cfg(feature = "declaration")]
 pub mod access_key;
+#[cfg(feature = "default")]
 pub mod json;
+#[cfg(feature = "default")]
 pub mod query;
+#[cfg(feature = "default")]
 pub mod sigv4;

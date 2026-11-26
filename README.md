@@ -24,6 +24,10 @@ Query API lived in http from 2026-09-14, and JSON 1.1 in aws-kinesis
 
 The Query API's form body is written and read by `codec::percent::encode_pairs` and `decode_pairs`, one reading with HTTP's query; until 2026-09-28 this crate wrote and decoded the form again.
 
+## The declaration
+
+The setting every AWS technology declares, `access_key_id`, is a `const` here, `access_key::ACCESS_KEY_ID` (ADR-0064, amendment 2026-11-26). Built with its `declaration` feature alone (`--no-default-features --features declaration`), the crate is that and nothing more: `access_key::signing_as`, the signer, the protocols and every crate they are built on — the http technology, and with it TLS — are behind the default feature. A technology's own declaration takes it so, aws-s3's since 2026-11-26, for the library the surfaces load to carry once the gathering crate of open problem 48 links it. `test/Declaration.Test.ps1` in the estate holds that the declaration builds nothing the transport capability does not.
+
 ## Toolchain
 
 `rust-toolchain.toml` pins the toolchain for the whole estate. Do not change it

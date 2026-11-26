@@ -4,8 +4,13 @@
 //! The secret is a `password` secret, kept in the Administration Database
 //! and read at each request (`transport::secured::presented`), since
 //! Signature Version 4 signs every request.
+//!
+//! [`ACCESS_KEY_ID`] is the declaration, built with the `declaration`
+//! feature alone; `signing_as` is code, behind the default feature.
 
+#[cfg(feature = "default")]
 use transport::Secured;
+#[cfg(feature = "default")]
 use transport::error::Result;
 use xcore::settings::{Applies, Kind, Presence, Setting};
 
@@ -29,6 +34,7 @@ pub const ACCESS_KEY_ID: Setting = Setting {
 ///
 /// # Errors
 /// Permanent, in words, where `access_key` is empty.
+#[cfg(feature = "default")]
 pub fn signing_as(access_key: &str, secured: Secured) -> Result<Secured> {
     if access_key.is_empty() {
         return Err(transport::secured::without_holder(
