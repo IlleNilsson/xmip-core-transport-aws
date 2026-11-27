@@ -28,11 +28,6 @@ The Query API's form body is written and read by `codec::percent::encode_pairs` 
 
 The setting every AWS technology declares, `access_key_id`, is a `const` here, `access_key::ACCESS_KEY_ID` (ADR-0064, amendment 2026-11-26). Built with its `declaration` feature alone (`--no-default-features --features declaration`), the crate is that and nothing more: `access_key::signing_as`, the signer, the protocols and every crate they are built on — the http technology, and with it TLS — are behind the default feature. A technology's own declaration takes it so, aws-s3's, aws-kinesis', aws-sns' and aws-sqs' since 2026-11-26, and the library the surfaces load carries it through the gathering crate xmip-core-declaration (open problem 48). `test/Declaration.Test.ps1` in the estate holds that the declaration builds nothing the transport capability does not.
 
-## Toolchain
-
-`rust-toolchain.toml` pins the toolchain for the whole estate. Do not change it
-here.
-
 ## Verification
 
 The included workflow is manual-only and calls the versioned shared workflow at
