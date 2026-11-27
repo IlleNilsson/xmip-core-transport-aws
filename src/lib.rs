@@ -20,9 +20,9 @@
 //! on a sibling (ADR-0044).
 //!
 //! Built with its `declaration` feature alone, the crate is the setting
-//! every AWS technology declares, `access_key::ACCESS_KEY_ID`, and none of
-//! the code, which is behind the default feature (ADR-0064, amendment
-//! 2026-11-26).
+//! every AWS technology declares, `access_key::ACCESS_KEY_ID`: the transport
+//! guide's "The declaration",
+//! `module/core/capability/transport/doc/adding-a-transport.md`.
 
 #[cfg(feature = "declaration")]
 pub mod access_key;
